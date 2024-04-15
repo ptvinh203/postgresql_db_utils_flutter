@@ -6,3 +6,4 @@ export 'src/postgresql_db.dart';
 export 'src/query.dart';
 export 'src/query_type.dart';
 export 'src/utils/string_ext.dart';
+export 'package:get_it/get_it.dart';

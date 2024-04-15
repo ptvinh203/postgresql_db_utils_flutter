@@ -13,6 +13,9 @@ class BaseRepository<T extends Entity, ID> {
     _getInstance = getInstance;
   }
 
+  // Getters
+  String get tableName => _tableName;
+
   Future<T?> save(T data, {bool isUpdate = false}) async {
     var query = isUpdate
         ? (Query<T>(type: QueryType.update, tableName: _tableName)
