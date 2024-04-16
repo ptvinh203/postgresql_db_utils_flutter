@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:postgresql_db_utils/src/entity.dart';
 import 'package:postgresql_db_utils/src/query.dart';
 import 'package:postgresql_db_utils/src/query_type.dart';
+import 'package:postgresql_db_utils/src/utils/string_ext.dart';
 
 class BaseRepository<T extends Entity, ID> {
   late final String _tableName;
@@ -16,7 +17,7 @@ class BaseRepository<T extends Entity, ID> {
   // Getters
   String get tableName => _tableName;
 
-  Future<T?> save(T data, {bool isUpdate = false}) async {
+  Future<T> save(T data, {bool isUpdate = false}) async {
     var query = isUpdate
         ? (Query<T>(type: QueryType.update, tableName: _tableName)
           ..value(data)
@@ -27,8 +28,8 @@ class BaseRepository<T extends Entity, ID> {
     if (!data.isValid()) {
       throw Exception("Data is not valid: ${data.toValueMap(true)}");
     }
-    var resultRow = (await query.commit()).firstOrNull;
-    return resultRow != null ? _getInstance().fromResultRow(resultRow) : null;
+    (await query.commit()).firstOrNull;
+    return data;
   }
 
   Future<List<T>> saveAll(List<T> data) async {
@@ -36,7 +37,7 @@ class BaseRepository<T extends Entity, ID> {
     for (var item in data) {
       try {
         var result = await save(item);
-        if (result != null) results.add(result);
+        results.add(result);
       } catch (e) {
         debugPrint(e.toString());
       }
@@ -53,7 +54,7 @@ class BaseRepository<T extends Entity, ID> {
 
   Future<T?> findById(ID id) async {
     var query = Query<T>(type: QueryType.select, tableName: _tableName)
-      ..where("id=$id");
+      ..where("id=${id.toString().wrapString}");
     var resultRow = (await query.commit()).firstOrNull;
     return resultRow != null ? _getInstance().fromResultRow(resultRow) : null;
   }
@@ -63,7 +64,7 @@ class BaseRepository<T extends Entity, ID> {
 
   void deleteById(ID id) async {
     var query = Query<T>(type: QueryType.delete, tableName: _tableName)
-      ..where("id=$id");
+      ..where("id=${id.toString().wrapString}");
     await query.commit();
   }
 }
